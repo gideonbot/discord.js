@@ -160,12 +160,12 @@ class GuildChannel extends Channel {
     const overwrites = this.overwritesFor(member, true, roles);
 
     return permissions
-      .remove(overwrites.everyone ? overwrites.everyone.deny : 0)
-      .add(overwrites.everyone ? overwrites.everyone.allow : 0)
-      .remove(overwrites.roles.length > 0 ? overwrites.roles.map(role => role.deny) : 0)
-      .add(overwrites.roles.length > 0 ? overwrites.roles.map(role => role.allow) : 0)
-      .remove(overwrites.member ? overwrites.member.deny : 0)
-      .add(overwrites.member ? overwrites.member.allow : 0)
+      .remove(overwrites.everyone ? overwrites.everyone.deny : 0n)
+      .add(overwrites.everyone ? overwrites.everyone.allow : 0n)
+      .remove(overwrites.roles.length > 0n ? overwrites.roles.map(role => role.deny) : 0n)
+      .add(overwrites.roles.length > 0n ? overwrites.roles.map(role => role.allow) : 0n)
+      .remove(overwrites.member ? overwrites.member.deny : 0n)
+      .add(overwrites.member ? overwrites.member.allow : 0n)
       .freeze();
   }
 
@@ -182,10 +182,10 @@ class GuildChannel extends Channel {
     const roleOverwrites = this.permissionOverwrites.get(role.id);
 
     return role.permissions
-      .remove(everyoneOverwrites ? everyoneOverwrites.deny : 0)
-      .add(everyoneOverwrites ? everyoneOverwrites.allow : 0)
-      .remove(roleOverwrites ? roleOverwrites.deny : 0)
-      .add(roleOverwrites ? roleOverwrites.allow : 0)
+      .remove(everyoneOverwrites ? everyoneOverwrites.deny : 0n)
+      .add(everyoneOverwrites ? everyoneOverwrites.allow : 0n)
+      .remove(roleOverwrites ? roleOverwrites.deny : 0n)
+      .add(roleOverwrites ? roleOverwrites.allow : 0n)
       .freeze();
   }
 
@@ -283,7 +283,7 @@ class GuildChannel extends Channel {
   get members() {
     const members = new Collection();
     for (const member of this.guild.members.cache.values()) {
-      if (this.permissionsFor(member).has('VIEW_CHANNEL', false)) {
+      if (this.permissionsFor(member).has(Permissions.FLAGS.VIEW_CHANNEL, false)) {
         members.set(member.id, member);
       }
     }
