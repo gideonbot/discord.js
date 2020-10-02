@@ -68,7 +68,7 @@ exports.DefaultOptions = {
       $browser: 'discord.js',
       $device: 'discord.js',
     },
-    version: 6,
+    version: 8,
   },
 
   /**
@@ -80,7 +80,7 @@ exports.DefaultOptions = {
    * @property {string} [invite='https://discord.gg'] Base url of invites
    */
   http: {
-    version: 7,
+    version: 8,
     api: 'https://discord.com/api',
     cdn: 'https://cdn.discordapp.com',
     invite: 'https://discord.gg',

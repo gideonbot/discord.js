@@ -109,7 +109,7 @@ class RoleManager extends BaseManager {
    */
   create({ data = {}, reason } = {}) {
     if (data.color) data.color = resolveColor(data.color);
-    if (data.permissions) data.permissions = Permissions.resolve(data.permissions);
+    if (data.permissions) data.permissions = Permissions.resolve(data.permissions).toString();
 
     return this.guild.client.api
       .guilds(this.guild.id)
