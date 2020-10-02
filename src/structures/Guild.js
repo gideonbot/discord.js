@@ -210,13 +210,6 @@ class Guild extends Base {
     this.systemChannelID = data.system_channel_id;
 
     /**
-     * Whether embedded images are enabled on this guild
-     * @type {boolean}
-     * @deprecated
-     */
-    this.embedEnabled = data.embed_enabled;
-
-    /**
      * The type of premium tier:
      * * 0: NONE
      * * 1: TIER_1
@@ -253,14 +246,6 @@ class Guild extends Base {
      * @name Guild#widgetChannelID
      */
     if (typeof data.widget_channel_id !== 'undefined') this.widgetChannelID = data.widget_channel_id;
-
-    /**
-     * The embed channel ID, if enabled
-     * @type {?string}
-     * @name Guild#embedChannelID
-     * @deprecated
-     */
-    if (typeof data.embed_channel_id !== 'undefined') this.embedChannelID = data.embed_channel_id;
 
     /**
      * The verification level of the guild
@@ -576,16 +561,6 @@ class Guild extends Base {
   }
 
   /**
-   * Embed channel for this guild
-   * @type {?TextChannel}
-   * @readonly
-   * @deprecated
-   */
-  get embedChannel() {
-    return this.client.channels.cache.get(this.embedChannelID) || null;
-  }
-
-  /**
    * Rules channel for this guild
    * @type {?TextChannel}
    * @readonly
@@ -880,20 +855,6 @@ class Guild extends Base {
    */
 
   /**
-   * Fetches the guild embed.
-   * @returns {Promise<GuildWidget>}
-   * @deprecated
-   * @example
-   * // Fetches the guild embed
-   * guild.fetchEmbed()
-   *   .then(embed => console.log(`The embed is ${embed.enabled ? 'enabled' : 'disabled'}`))
-   *   .catch(console.error);
-   */
-  fetchEmbed() {
-    return this.fetchWidget();
-  }
-
-  /**
    * Fetches the guild widget.
    * @returns {Promise<GuildWidget>}
    * @example
@@ -904,8 +865,8 @@ class Guild extends Base {
    */
   async fetchWidget() {
     const data = await this.client.api.guilds(this.id).widget.get();
-    this.widgetEnabled = this.embedEnabled = data.enabled;
-    this.widgetChannelID = this.embedChannelID = data.channel_id;
+    this.widgetEnabled = data.enabled;
+    this.widgetChannelID = data.channel_id;
     return {
       enabled: data.enabled,
       channel: data.channel_id ? this.channels.cache.get(data.channel_id) : null,
@@ -1381,17 +1342,6 @@ class Guild extends Base {
   }
 
   /**
-   * Edits the guild's embed.
-   * @param {GuildWidgetData} embed The embed for the guild
-   * @param {string} [reason] Reason for changing the guild's embed
-   * @returns {Promise<Guild>}
-   * @deprecated
-   */
-  setEmbed(embed, reason) {
-    return this.setWidget(embed, reason);
-  }
-
-  /**
    * Edits the guild's widget.
    * @param {GuildWidgetData} widget The widget for the guild
    * @param {string} [reason] Reason for changing the guild's widget
@@ -1452,7 +1402,7 @@ class Guild extends Base {
    * @returns {boolean}
    */
   equals(guild) {
-    let equal =
+    return (
       guild &&
       guild instanceof this.constructor &&
       this.id === guild.id &&
@@ -1466,20 +1416,10 @@ class Guild extends Base {
       this.icon === guild.icon &&
       this.ownerID === guild.ownerID &&
       this.verificationLevel === guild.verificationLevel &&
-      this.embedEnabled === guild.embedEnabled &&
       (this.features === guild.features ||
         (this.features.length === guild.features.length &&
-          this.features.every((feat, i) => feat === guild.features[i])));
-
-    if (equal) {
-      if (this.embedChannel) {
-        if (!guild.embedChannel || this.embedChannel.id !== guild.embedChannel.id) equal = false;
-      } else if (guild.embedChannel) {
-        equal = false;
-      }
-    }
-
-    return equal;
+          this.features.every((feat, i) => feat === guild.features[i])))
+    );
   }
 
   /**
@@ -1510,7 +1450,7 @@ class Guild extends Base {
 
   /**
    * Creates a collection of this guild's roles, sorted by their position and IDs.
-   * @returns {Collection<Role>}
+   * @returns {Collection<Snowflake, Role>}
    * @private
    */
   _sortedRoles() {
@@ -1520,7 +1460,7 @@ class Guild extends Base {
   /**
    * Creates a collection of this guild's or a specific category's channels, sorted by their position and IDs.
    * @param {GuildChannel} [channel] Category to get the channels of
-   * @returns {Collection<GuildChannel>}
+   * @returns {Collection<Snowflake, GuildChannel>}
    * @private
    */
   _sortedChannels(channel) {
@@ -1536,10 +1476,6 @@ class Guild extends Base {
     );
   }
 }
-
-Guild.prototype.setEmbed = deprecate(Guild.prototype.setEmbed, 'Guild#setEmbed: Use setWidget instead');
-
-Guild.prototype.fetchEmbed = deprecate(Guild.prototype.fetchEmbed, 'Guild#fetchEmbed: Use fetchWidget instead');
 
 Guild.prototype.fetchVanityCode = deprecate(
   Guild.prototype.fetchVanityCode,
