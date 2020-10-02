@@ -3069,8 +3069,8 @@ declare module 'discord.js' {
 
   interface RawOverwriteData {
     id: Snowflake;
-    allow: number;
-    deny: number;
+    allow: string;
+    deny: string;
     type: OverwriteType;
   }
 
