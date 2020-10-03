@@ -117,7 +117,7 @@ declare module 'discord.js' {
   }
 
   export class BaseClient extends EventEmitter {
-    constructor(options?: ClientOptions);
+    constructor(options: ClientOptions);
     private _timeouts: Set<NodeJS.Timeout>;
     private _intervals: Set<NodeJS.Timeout>;
     private _immediates: Set<NodeJS.Immediate>;
@@ -192,7 +192,7 @@ declare module 'discord.js' {
   }
 
   export class Client extends BaseClient {
-    constructor(options?: ClientOptions);
+    constructor(options: ClientOptions);
     private actions: object;
     private _eval(script: string): any;
     private _validateOptions(options?: ClientOptions): void;
@@ -500,6 +500,7 @@ declare module 'discord.js' {
       UNKNOWN_WEBHOOK: 10015;
       BOT_PROHIBITED_ENDPOINT: 20001;
       BOT_ONLY_ENDPOINT: 20002;
+      ANNOUNCEMENT_EDIT_LIMIT_EXCEEDED: 20022;
       MAXIMUM_GUILDS: 30001;
       MAXIMUM_FRIENDS: 30002;
       MAXIMUM_PINS: 30003;
@@ -526,8 +527,11 @@ declare module 'discord.js' {
       NOTE_TOO_LONG: 50015;
       INVALID_BULK_DELETE_QUANTITY: 50016;
       CANNOT_PIN_MESSAGE_IN_OTHER_CHANNEL: 50019;
+      INVALID_OR_TAKEN_INVITE_CODE: 50020;
       CANNOT_EXECUTE_ON_SYSTEM_MESSAGE: 50021;
+      CANNOT_EXECUTE_ON_CHANNEL_TYPE: 50024;
       INVALID_OAUTH_TOKEN: 50025;
+      INVALID_RECIPIENTS: 50033;
       BULK_DELETE_MESSAGE_TOO_OLD: 50034;
       INVALID_FORM_BODY: 50035;
       INVITE_ACCEPTED_TO_GUILD_NOT_CONTAINING_BOT: 50036;
@@ -2324,7 +2328,7 @@ declare module 'discord.js' {
     restSweepInterval?: number;
     retryLimit?: number;
     presence?: PresenceData;
-    ws?: WebSocketOptions;
+    ws: WebSocketOptions;
     http?: HTTPOptions;
   }
 
@@ -3194,7 +3198,7 @@ declare module 'discord.js' {
   interface WebSocketOptions {
     large_threshold?: number;
     compress?: boolean;
-    intents?: BitFieldResolvable<IntentsString, number> | number;
+    intents: BitFieldResolvable<IntentsString, number> | number;
     properties?: WebSocketProperties;
   }
 
