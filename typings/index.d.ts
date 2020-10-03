@@ -2269,7 +2269,7 @@ declare module 'discord.js' {
 
   interface ClientEvents {
     channelCreate: [GuildChannel];
-    channelDelete: [GuildChannel];
+    channelDelete: [DMChannel | GuildChannel];
     channelPinsUpdate: [Channel | PartialDMChannel, Date];
     channelUpdate: [Channel, Channel];
     debug: [string];
