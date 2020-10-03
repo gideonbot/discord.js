@@ -1316,7 +1316,7 @@ class Guild extends Base {
    * @returns {Promise<Guild>}
    * @example
    * guild.setRolePositions([{ role: roleID, position: updatedRoleIndex }])
-   *  .then(guild => console.log(`Role Positions updated for ${guild}`))
+   *  .then(guild => console.log(`Role positions updated for ${guild}`))
    *  .catch(console.error);
    */
   setRolePositions(rolePositions) {
