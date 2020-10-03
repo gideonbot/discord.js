@@ -5,7 +5,13 @@ const ytdl = require('ytdl-core');
 const auth = require('./auth.js');
 const Discord = require('../src');
 
-const client = new Discord.Client({ fetchAllMembers: false, partials: [] });
+const client = new Discord.Client({
+  fetchAllMembers: false,
+  partials: [],
+  ws: {
+    intents: Discord.Intents.NON_PRIVILEGED,
+  },
+});
 
 client
   .login(auth.token)
@@ -51,12 +57,7 @@ client.on('message', m => {
     }
   } else if (m.content.startsWith('#eval') && m.author.id === '66564597481480192') {
     try {
-      const com = eval(
-        m.content
-          .split(' ')
-          .slice(1)
-          .join(' '),
-      );
+      const com = eval(m.content.split(' ').slice(1).join(' '));
       m.channel.send(com, { code: true });
     } catch (e) {
       console.log(e);

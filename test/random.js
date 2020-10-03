@@ -9,7 +9,12 @@ const Discord = require('../src');
 
 console.time('magic');
 
-const client = new Discord.Client({ fetchAllMembers: true });
+const client = new Discord.Client({
+	fetchAllMembers: true,
+	ws: {
+		intents: Discord.Intents.NON_PRIVILEGED
+	}
+});
 
 client
   .login(token)

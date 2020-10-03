@@ -9,6 +9,9 @@ const client = new Discord.Client({
   // You will notice that all messages will mention @everyone
   // disableEveryone: true
   disableMentions: 'everyone',
+  ws: {
+    intents: Discord.Intents.NON_PRIVILEGED,
+  },
 });
 
 const tests = [
