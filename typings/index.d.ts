@@ -9,6 +9,11 @@ declare enum ChannelType {
   unknown = 7,
 }
 
+declare enum OverwriteTypes {
+  role = 0,
+  member = 1,
+}
+
 declare module 'discord.js' {
   import BaseCollection from '@discordjs/collection';
   import { ChildProcess } from 'child_process';
@@ -117,7 +122,7 @@ declare module 'discord.js' {
   }
 
   export class BaseClient extends EventEmitter {
-    constructor(options: ClientOptions);
+    constructor(options?: ClientOptions);
     private _timeouts: Set<NodeJS.Timeout>;
     private _intervals: Set<NodeJS.Timeout>;
     private _immediates: Set<NodeJS.Immediate>;
@@ -192,7 +197,7 @@ declare module 'discord.js' {
   }
 
   export class Client extends BaseClient {
-    constructor(options: ClientOptions);
+    constructor(options?: ClientOptions);
     private actions: object;
     private _eval(script: string): any;
     private _validateOptions(options?: ClientOptions): void;
@@ -572,7 +577,7 @@ declare module 'discord.js' {
     };
     MessageTypes: MessageType[];
     ActivityTypes: ActivityType[];
-    OverwriteTypes: OverwriteType[];
+    OverwriteTypes: OverwriteTypes;
     ExplicitContentFilterLevels: ExplicitContentFilterLevel[];
     DefaultMessageNotifications: DefaultMessageNotifications[];
     VerificationLevels: VerificationLevel[];
@@ -2328,7 +2333,7 @@ declare module 'discord.js' {
     restSweepInterval?: number;
     retryLimit?: number;
     presence?: PresenceData;
-    ws: WebSocketOptions;
+    ws?: WebSocketOptions;
     http?: HTTPOptions;
   }
 
@@ -3198,7 +3203,7 @@ declare module 'discord.js' {
   interface WebSocketOptions {
     large_threshold?: number;
     compress?: boolean;
-    intents: BitFieldResolvable<IntentsString, number> | number;
+    intents?: BitFieldResolvable<IntentsString, number> | number;
     properties?: WebSocketProperties;
   }
 
