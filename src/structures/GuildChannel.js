@@ -266,8 +266,8 @@ class GuildChannel extends Channel {
         data: {
           id: userOrRole.id,
           type,
-          allow: allow.bitfield.toString(),
-          deny: deny.bitfield.toString(),
+          allow,
+          deny,
         },
         reason,
       })
