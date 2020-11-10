@@ -110,9 +110,9 @@
     "src/client/voice/receiver/PacketHandler.js": false,
     "src/client/voice/receiver/Receiver.js": false,
     "src/client/voice/util/PlayInterface.js": false,
-    "src/client/voice/util/Secretbox.js": false,
     "src/client/voice/util/Silence.js": false,
-    "src/client/voice/util/VolumeInterface.js": false
+    "src/client/voice/util/VolumeInterface.js": false,
+    "src/util/Sodium.js": false
   },
   "husky": {
     "hooks": {
