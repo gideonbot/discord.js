@@ -50,7 +50,7 @@ class ClientUser extends Structures.get('User') {
    * Edits the logged in client.
    * @param {Object} data The new data
    * @param {string} [data.username] The new username
-   * @param {ufferResolvable|Base64Resolvable} [data.avatar] The new avatar
+   * @param {BufferResolvable|Base64Resolvable} [data.avatar] The new avatar
    */
   async edit(data) {
     const newData = await this.client.api.users('@me').patch({ data });
@@ -96,11 +96,9 @@ class ClientUser extends Structures.get('User') {
    * @property {PresenceStatusData} [status] Status of the user
    * @property {boolean} [afk] Whether the user is AFK
    * @property {Object} [activity] Activity the user is playing
-   * @property {Object|string} [activity.application] An application object or application id
-   * @property {string} [activity.application.id] The id of the application
    * @property {string} [activity.name] Name of the activity
    * @property {ActivityType|number} [activity.type] Type of the activity
-   * @property {string} [activity.url] Stream url
+   * @property {string} [activity.url] Twitch / YouTube stream URL
    * @property {?number|number[]} [shardID] Shard Id(s) to have the activity set on
    */
 
@@ -143,10 +141,10 @@ class ClientUser extends Structures.get('User') {
   }
 
   /**
-   * Options for setting an activity
+   * Options for setting an activity.
    * @typedef ActivityOptions
    * @type {Object}
-   * @property {string} [url] Twitch stream URL
+   * @property {string} [url] Twitch / YouTube stream URL
    * @property {ActivityType|number} [type] Type of the activity
    * @property {number|number[]} [shardID] Shard Id(s) to have the activity set on
    */
