@@ -376,7 +376,7 @@ class Client extends BaseClient {
     const application = await this.fetchApplication();
     const query = new URLSearchParams({
       client_id: application.id,
-      permissions: Permissions.resolve(options.permissions).toJSON(),
+      permissions: Permissions.resolve(options.permissions).toString(),
       scope: 'bot',
     });
     if (typeof options.disableGuildSelect === 'boolean') {
