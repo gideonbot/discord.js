@@ -284,7 +284,7 @@ class Message extends Base {
    * @readonly
    */
   get member() {
-    return this.guild ? this.guild.member(this.author) || null : null;
+    return this.guild ? this.guild.members.resolve(this.author) || null : null;
   }
 
   /**
@@ -422,6 +422,23 @@ class Message extends Base {
     return (
       this.type === 'DEFAULT' &&
       (!this.guild || this.channel.permissionsFor(this.client.user).has(Permissions.FLAGS.MANAGE_MESSAGES, false))
+    );
+  }
+
+  /**
+   * Whether the message is crosspostable by the client user
+   * @type {boolean}
+   * @readonly
+   */
+  get crosspostable() {
+    return (
+      this.channel.type === 'news' &&
+      !this.flags.has(MessageFlags.FLAGS.CROSSPOSTED) &&
+      this.type === 'DEFAULT' &&
+      this.channel.viewable &&
+      this.channel.permissionsFor(this.client.user).has(Permissions.FLAGS.SEND_MESSAGES) &&
+      (this.author.id === this.client.user.id ||
+        this.channel.permissionsFor(this.client.user).has(Permissions.FLAGS.MANAGE_MESSAGES))
     );
   }
 
