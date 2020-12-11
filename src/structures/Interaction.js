@@ -99,7 +99,10 @@ class Interaction extends Base {
 
     const { data, files } = await apiMessage.resolveFiles();
 
-    return this.client.api.webhooks(this.id, this.token).post({
+    const clientId = this.client.interactionClient.clientId
+      || (await this.client.api.oauth2.applications('@me').get()).id;
+
+    return this.client.api.webhooks(clientId, this.token).post({
       auth: false,
       data,
       files,

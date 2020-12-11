@@ -36,10 +36,15 @@ class InteractionClient extends BaseClient {
    */
   constructor(options, handler, client) {
     super(options);
-    this.client = client || this;
+
     this.handler = handler;
     this.token = options.token;
     this.publicKey = options.publicKey ? Buffer.from(options.publicKey, 'hex') : undefined;
+    this.clientId = options.clientId;
+
+    // Compat for direct usage
+    this.client = client || this;
+    this.interactionClient = this;
   }
 
   getCommands(guildID) {
