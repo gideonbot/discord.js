@@ -135,20 +135,37 @@ class InteractionClient extends BaseClient {
     }
   }
 
-  async handleFromHTTP(body, signature, timestamp) {
-    if (sodium === undefined) {
-      sodium = require('../util/Sodium');
-    }
-    if (!sodium.methods.verify(Buffer.from(signature, 'hex'), Buffer.from(timestamp + body), this.publicKey)) {
-      return { status: 400, body: '' };
-    }
-    const data = JSON.parse(body);
+  middleware() {
+    return async (req, res, next) => {
+      const timestamp = req.get('x-signature-timestamp');
+      const signature = req.get('x-signature-ed25519');
 
-    const result = await this.handle(data);
+      const chunks = [];
+      for await (const chunk of req) {
+        chunks.push(chunk);
+      }
+      const body = Buffer.concat(chunks);
 
-    return {
-      status: 200,
-      body: JSON.stringify(result),
+      if (sodium === undefined) {
+        sodium = require('../util/Sodium');
+      }
+      if (
+        !sodium.methods.verify(
+          Buffer.from(signature, 'hex'),
+          Buffer.concat([Buffer.from(timestamp), body]),
+          this.publicKey,
+        )
+      ) {
+        res.status(403).end();
+        return;
+      }
+
+      const data = JSON.parse(body.toString());
+
+      const result = await this.handle(data);
+      res.status(200).end(JSON.stringify(result));
+
+      next();
     };
   }
 
