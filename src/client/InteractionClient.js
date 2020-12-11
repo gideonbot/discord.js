@@ -3,27 +3,29 @@
 const BaseClient = require('./BaseClient');
 const ApplicationCommand = require('../structures/ApplicationCommand');
 const Interaction = require('../structures/Interaction');
-const { ApplicationCommandOptionType, InteractionType, InteractionResponseType } = require('../util/Constants');
+const { Events, ApplicationCommandOptionType, InteractionType, InteractionResponseType } = require('../util/Constants');
 
 let sodium;
 
 /**
  * Interaction client is used for interactions.
  *
- * ```js
+ * @example
  * const client = new InteractionClient({
  *   token: ABC,
  *   publicKey: XYZ,
- * }, async (interaction) => {
+ * });
+ *
+ * client.on('interactionCreate', () => {
  *   // automatically handles long responses
  *   if (will take a long time) {
- *     await doSomethingLong.then((d) => {
+ *     doSomethingLong.then((d) => {
  *       interaction.reply({
  *         content: 'wow that took long',
  *       });
  *     });
  *   } else {
- *     await interaction.reply('hi!');
+ *     interaction.reply('hi!');
  *   }
  * });
  * ```
@@ -31,16 +33,25 @@ let sodium;
 class InteractionClient extends BaseClient {
   /**
    * @param {Options} options Options for the client.
-   * @param {Handler} handler Handler to handle things.
    * @param {undefined} client For internal use.
    */
-  constructor(options, handler, client) {
+  constructor(options, client) {
     super(options);
 
-    this.handler = handler;
-    this.token = options.token;
-    this.publicKey = options.publicKey ? Buffer.from(options.publicKey, 'hex') : undefined;
-    this.clientID = options.clientID;
+    Object.defineProperty(this, 'token', {
+      value: options.token,
+      writable: true,
+    });
+
+    Object.defineProperty(this, 'clientID', {
+      value: options.clientID,
+      writable: true,
+    });
+
+    Object.defineProperty(this, 'publicKey', {
+      value: options.publicKey ? Buffer.from(options.publicKey, 'hex') : undefined,
+      writable: true,
+    });
 
     // Compat for direct usage
     this.client = client || this;
@@ -49,7 +60,7 @@ class InteractionClient extends BaseClient {
 
   /**
    * Get registered slash commands.
-   * @param {Snowflake?} guildID Optional guild ID.
+   * @param {Snowflake} [guildID] Optional guild ID.
    * @returns {Command[]}
    */
   async getCommands(guildID) {
@@ -92,7 +103,7 @@ class InteractionClient extends BaseClient {
     return new ApplicationCommand(this, c, guildID);
   }
 
-  async handle(data) {
+  handle(data) {
     switch (data.type) {
       case InteractionType.PING:
         return {
@@ -101,7 +112,7 @@ class InteractionClient extends BaseClient {
       case InteractionType.APPLICATION_COMMAND: {
         let timedOut = false;
         let resolve;
-        const p0 = new Promise(r => {
+        const directPromise = new Promise(r => {
           resolve = r;
           this.client.setTimeout(() => {
             timedOut = true;
@@ -133,13 +144,14 @@ class InteractionClient extends BaseClient {
 
         const interaction = new Interaction(this.client, data, syncHandle);
 
-        Promise.resolve(this.handler(interaction)).catch(e => {
-          this.client.emit('error', e);
-        });
+        /**
+         * Emitted when an interaction is created.
+         * @event Client#interactionCreate
+         * @param {Interaction} interaction The interaction which was created.
+         */
+        this.client.emit(Events.INTERACTION_CREATE, interaction);
 
-        const result = await p0;
-
-        return result;
+        return directPromise;
       }
       default:
         throw new RangeError('Invalid interaction data');

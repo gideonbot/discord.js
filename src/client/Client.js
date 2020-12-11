@@ -108,18 +108,7 @@ class Client extends BaseClient {
      * The interaction client.
      * @type {InteractionClient}
      */
-    this.interactionClient = new InteractionClient(
-      options,
-      interaction => {
-        /**
-         * Emitted when an interaction is created.
-         * @event Client#interactionCreate
-         * @param {Interaction} interaction The interaction which was created.
-         */
-        this.emit(Events.INTERACTION_CREATE, interaction);
-      },
-      this,
-    );
+    this.interactionClient = new InteractionClient(options, this);
 
     /**
      * All of the {@link User} objects that have been cached at any point, mapped by their IDs

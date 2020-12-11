@@ -19,48 +19,56 @@ class Interaction extends Base {
     /**
      * The ID of this interaction.
      * @type {Snowflake}
+     * @readonly
      */
     this.id = data.id;
 
     /**
      * The token of this interaction.
      * @type {string}
+     * @readonly
      */
     this.token = data.token;
 
     /**
      * The ID of the invoked command.
      * @type {Snowflake}
+     * @readonly
      */
     this.commandID = data.data.id;
 
     /**
      * The name of the invoked command.
      * @type {string}
+     * @readonly
      */
     this.commandName = data.data.name;
 
     /**
      * The options passed to the command.
      * @type {Object}
+     * @readonly
      */
     this.options = data.data.options;
 
     /**
      * The channel this interaction was sent in.
-     * @type {Channel}
+     * @type {?Channel}
+     * @readonly
      */
-    this.channel = this.client.channels?.cache.get(data.channel_id);
+    this.channel = this.client.channels?.cache.get(data.channel_id) || null;
 
     /**
      * The guild this interaction was sent in, if any.
      * @type {?Guild}
+     * @readonly
      */
     this.guild = data.guild_id ? this.client.guilds?.cache.get(data.guild_id) : null;
 
     /**
      * If this interaction was sent in a guild, the member which sent it.
      * @type {?Member}
+     * @readonly
      */
     this.member = data.member ? this.guild?.members.add(data.member, false) : null;
   }

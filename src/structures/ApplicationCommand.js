@@ -17,7 +17,7 @@ class ApplicationCommand extends Base {
      * @type {Snowflake?}
      * @readonly
      */
-    this.guildID = guildID;
+    this.guildID = guildID || null;
 
     this._patch(data);
   }
