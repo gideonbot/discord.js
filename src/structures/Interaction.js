@@ -67,22 +67,20 @@ class Interaction extends Base {
   }
 
   /**
-   * The timestamp the emoji was created at, or null if unicode
-   * @type {?number}
+   * The timestamp the interaction was created at.
+   * @type {number}
    * @readonly
    */
   get createdTimestamp() {
-    if (!this.id) return null;
     return Snowflake.deconstruct(this.id).timestamp;
   }
 
   /**
-   * The time the emoji was created at, or null if unicode
-   * @type {?Date}
+   * The time the interaction was created at.
+   * @type {Date}
    * @readonly
    */
   get createdAt() {
-    if (!this.id) return null;
     return new Date(this.createdTimestamp);
   }
 

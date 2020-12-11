@@ -2,6 +2,7 @@
 
 const BaseClient = require('./BaseClient');
 const Interaction = require('../structures/Interaction');
+const ApplicationCommand = require('../structures/InteractionCommand');
 const { ApplicationCommandOptionType, InteractionType, InteractionResponseType } = require('../util/Constants');
 
 let sodium;
@@ -46,20 +47,32 @@ class InteractionClient extends BaseClient {
     this.interactionClient = this;
   }
 
-  getCommands(guildID) {
+  /**
+   * Get registered slash commands.
+   * @param {Snowflake?} guildID Optional guild ID.
+   * @returns {[Command]}
+   */
+  async getCommands(guildID) {
     let path = this.client.api.applications('@me');
     if (guildID) {
       path = path.guilds(guildID);
     }
-    return path.commands.get();
+    const commands = await path.commands.get();
+    return commands.map(c => new ApplicationCommand(this, c, guildID));
   }
 
+  /**
+   * Create a command.
+   * @param {Object} command The command description.
+   * @param {Snowflake?} guildID Optional guild ID.
+   * @returns {ApplicationCommand} The created command.
+   */
   createCommand(command, guildID) {
     let path = this.client.api.applications('@me');
     if (guildID) {
       path = path.guilds(guildID);
     }
-    return path.commands.post({
+    const c = path.commands.post({
       data: {
         name: command.name,
         description: command.description,
@@ -71,19 +84,12 @@ class InteractionClient extends BaseClient {
             default: o.default,
             required: o.required,
             choices: o.choices,
-            options: o.options.map(m),
+            options: o.options ? o.options.map(m) : undefined,
           };
         }),
       },
     });
-  }
-
-  deleteCommand(commandID, guildID) {
-    let path = this.client.api.applications('@me');
-    if (guildID) {
-      path = path.guilds(guildID);
-    }
-    return path.commands(commandID).delete();
+    return new ApplicationCommand(this, c, guildID);
   }
 
   async handle(data) {
@@ -129,6 +135,11 @@ class InteractionClient extends BaseClient {
     }
   }
 
+  /**
+   * An express-like middleware factory which can be used
+   * with webhook interactions.
+   * @returns {Function} The middleware function.
+   */
   middleware() {
     return async (req, res, next) => {
       const timestamp = req.get('x-signature-timestamp');

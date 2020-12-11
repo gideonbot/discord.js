@@ -59,6 +59,7 @@ module.exports = {
 
   // Structures
   Application: require('./structures/interfaces/Application'),
+  ApplicationCommand: require('./structures/ApplicationCommand'),
   Base: require('./structures/Base'),
   Activity: require('./structures/Presence').Activity,
   APIMessage: require('./structures/APIMessage'),
@@ -81,6 +82,7 @@ module.exports = {
   GuildPreview: require('./structures/GuildPreview'),
   GuildTemplate: require('./structures/GuildTemplate'),
   Integration: require('./structures/Integration'),
+  Interaction: require('./structures/Interaction'),
   Invite: require('./structures/Invite'),
   Message: require('./structures/Message'),
   MessageAttachment: require('./structures/MessageAttachment'),

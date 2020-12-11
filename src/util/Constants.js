@@ -689,6 +689,9 @@ exports.ApplicationCommandOptionType = {
   CHANNEL: 7,
   ROLE: 8,
 };
+Object.entries(exports.ApplicationCommandOptionType).forEach(([k, v]) => {
+  exports.ApplicationCommandOptionType[v] = k;
+});
 
 exports.InteractionType = {
   PING: 1,
