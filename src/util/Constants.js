@@ -700,6 +700,7 @@ exports.InteractionResponseType = {
   ACKNOWLEDGE: 2,
   CHANNEL_MESSAGE: 3,
   CHANNEL_MESSAGE_WITH_SOURCE: 4,
+  ACKNOWLEDGE_WITH_SOURCE: 5,
 };
 
 function keyMirror(arr) {

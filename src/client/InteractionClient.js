@@ -1,6 +1,7 @@
 'use strict';
 
 const BaseClient = require('./BaseClient');
+const APIMessage = require('../structures/APIMessage');
 const Interaction = require('../structures/Interaction');
 const { ApplicationCommandOptionType, InteractionType, InteractionResponseType } = require('../util/Constants');
 
@@ -37,6 +38,7 @@ class InteractionClient extends BaseClient {
     super(options);
     this.client = client || this;
     this.handler = handler;
+    this.token = options.token;
     this.publicKey = options.publicKey ? Buffer.from(options.publicKey, 'hex') : undefined;
   }
 
@@ -87,44 +89,72 @@ class InteractionClient extends BaseClient {
           type: InteractionResponseType.PONG,
         };
       case InteractionType.APPLICATION_COMMAND: {
-        try {
-          const interaction = new Interaction(this.client, data);
-          const result = await this.handler(interaction);
-          if (result === null) {
-            return {
-              type: InteractionResponseType.ACKNOWLEDGE,
-            };
+        const interaction = new Interaction(this.client, data);
+
+        let done = false;
+        const r0 = new Promise(resolve => {
+          this.client.setTimeout(() => {
+            done = true;
+            resolve({
+              type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
+            });
+          }, 500);
+        });
+        const r1 = this.handler(interaction).then(async r => {
+          if (done) {
+            interaction.reply(r).catch(e => {
+              this.client.emit('error', e);
+            });
+            return undefined;
           }
-          // handle result as message resolvable here, probably DRY this branch with code in
-          // `Interaction#reply`, except `Interaction#reply` obviously does a POST and this just
-          // returns the data.
-          throw new Error('fucc');
-        } catch (e) {
-          this.client.emit('error', e);
+
+          let apiMessage;
+
+          if (r instanceof APIMessage) {
+            apiMessage = r.resolveData();
+          } else {
+            apiMessage = APIMessage.create(interaction, r).resolveData();
+            if (Array.isArray(apiMessage.data.content)) {
+              throw new Error();
+            }
+          }
+
+          const resolved = await apiMessage.resolveFiles();
           return {
-            type: InteractionResponseType.ACKNOWLEDGE,
+            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+            data: resolved.data,
           };
-        }
+        });
+
+        const result = await Promise.race([r0, r1]);
+
+        return result;
       }
       default:
         throw new RangeError('Invalid interaction data');
     }
   }
 
-  async handleFromHTTP(body, signature) {
+  async handleFromHTTP(body, signature, timestamp) {
     if (sodium === undefined) {
       sodium = require('../util/Sodium');
     }
-    if (!sodium.methods.verify(Buffer.from(signature, 'hex'), Buffer.from(body), this.publicKey)) {
-      throw new Error('Invalid signature');
+    if (!sodium.methods.verify(Buffer.from(signature, 'hex'), Buffer.from(timestamp + body), this.publicKey)) {
+      return { status: 400, body: '' };
     }
     const data = JSON.parse(body);
+
     const result = await this.handle(data);
-    return JSON.stringify(result);
+
+    return {
+      status: 200,
+      body: JSON.stringify(result),
+    };
   }
 
   async handleFromGateway(data) {
-    await this.handle(data);
+    const interaction = new Interaction(this.client, data);
+    await this.handler(interaction);
   }
 }
 

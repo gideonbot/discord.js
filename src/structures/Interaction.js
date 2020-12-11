@@ -50,19 +50,19 @@ class Interaction extends Base {
      * The channel this interaction was sent in.
      * @type {Channel}
      */
-    this.channel = this.client.channels.cache.get(data.channel_id);
+    this.channel = this.client.channels?.cache.get(data.channel_id);
 
     /**
      * The guild this interaction was sent in, if any.
      * @type {?Guild}
      */
-    this.guild = data.guild_id ? this.client.guilds.cache.get(data.guild_id) : null;
+    this.guild = data.guild_id ? this.client.guilds?.cache.get(data.guild_id) : null;
 
     /**
      * If this interaction was sent in a guild, the member which sent it.
      * @type {?Member}
      */
-    this.member = data.member ? this.guild.members.add(data.member, false) : null;
+    this.member = data.member ? this.guild?.members.add(data.member, false) : null;
   }
 
   /**
@@ -99,11 +99,9 @@ class Interaction extends Base {
 
     const { data, files } = await apiMessage.resolveFiles();
 
-    return this.client.api.interactions(this.id, this.token).callback.post({
-      data: {
-        type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-        data,
-      },
+    return this.client.api.webhooks(this.id, this.token).post({
+      auth: false,
+      data,
       files,
     });
   }
