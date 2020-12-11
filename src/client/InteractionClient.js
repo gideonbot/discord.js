@@ -108,19 +108,30 @@ class InteractionClient extends BaseClient {
             r({
               type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
             });
-          }, 500);
+          }, 250);
         });
 
-        const interaction = new Interaction(this.client, data, resolved => {
-          if (timedOut) {
-            return false;
-          }
-          resolve({
-            type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
-            data: resolved.data,
-          });
-          return true;
-        });
+        const syncHandle = {
+          acknowledge() {
+            if (!timedOut) {
+              resolve({
+                type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
+              });
+            }
+          },
+          reply(resolved) {
+            if (timedOut) {
+              return false;
+            }
+            resolve({
+              type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
+              data: resolved.data,
+            });
+            return true;
+          },
+        };
+
+        const interaction = new Interaction(this.client, data, syncHandle);
 
         Promise.resolve(this.handler(interaction)).catch(e => {
           this.client.emit('error', e);
@@ -141,7 +152,7 @@ class InteractionClient extends BaseClient {
    * @returns {Function} The middleware function.
    */
   middleware() {
-    return async (req, res, next) => {
+    return async (req, res) => {
       const timestamp = req.get('x-signature-timestamp');
       const signature = req.get('x-signature-ed25519');
 
@@ -169,8 +180,6 @@ class InteractionClient extends BaseClient {
 
       const result = await this.handle(data);
       res.status(200).end(JSON.stringify(result));
-
-      next();
     };
   }
 

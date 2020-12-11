@@ -9,9 +9,9 @@ const Snowflake = require('../util/Snowflake');
  * @extends {Base}
  */
 class Interaction extends Base {
-  constructor(client, data, handler) {
+  constructor(client, data, syncHandle) {
     super(client);
-    this.handler = handler;
+    this.syncHandle = syncHandle;
     this._patch(data);
   }
 
@@ -83,6 +83,18 @@ class Interaction extends Base {
     return new Date(this.createdTimestamp);
   }
 
+  /**
+   * Acknowledge this interaction without content.
+   */
+  async acknowledge() {
+    await this.syncHandle.acknowledge();
+  }
+
+  /**
+   * Reply to this interaction.
+   * @param {(StringResolvable | APIMessage)?} content The content for the message.
+   * @param {(MessageOptions | MessageAdditions)?} options The options to provide.
+   */
   async reply(content, options) {
     let apiMessage;
 
@@ -91,13 +103,13 @@ class Interaction extends Base {
     } else {
       apiMessage = APIMessage.create(this, content, options).resolveData();
       if (Array.isArray(apiMessage.data.content)) {
-        throw new Error();
+        throw new Error('Message is too long');
       }
     }
 
     const resolved = await apiMessage.resolveFiles();
 
-    if (!this.handler(resolved)) {
+    if (!this.syncHandle.reply(resolved)) {
       const clientID =
         this.client.interactionClient.clientID || (await this.client.api.oauth2.applications('@me').get()).id;
 
