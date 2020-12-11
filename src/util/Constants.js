@@ -273,6 +273,7 @@ exports.Events = {
   TYPING_START: 'typingStart',
   TYPING_STOP: 'typingStop',
   WEBHOOKS_UPDATE: 'webhookUpdate',
+  INTERACTION_CREATE: 'intreactionCreate',
   ERROR: 'error',
   WARN: 'warn',
   DEBUG: 'debug',
@@ -345,6 +346,7 @@ exports.PartialTypes = keyMirror(['USER', 'CHANNEL', 'GUILD_MEMBER', 'MESSAGE', 
  * * VOICE_STATE_UPDATE
  * * VOICE_SERVER_UPDATE
  * * WEBHOOKS_UPDATE
+ * * INTERACTION_CREATE
  * @typedef {string} WSEventType
  */
 exports.WSEvents = keyMirror([
@@ -384,6 +386,7 @@ exports.WSEvents = keyMirror([
   'VOICE_STATE_UPDATE',
   'VOICE_SERVER_UPDATE',
   'WEBHOOKS_UPDATE',
+  'INTERACTION_CREATE',
 ]);
 
 /**
