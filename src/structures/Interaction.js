@@ -10,8 +10,9 @@ const Snowflake = require('../util/Snowflake');
  * @extends {Base}
  */
 class Interaction extends Base {
-  constructor(client, data) {
+  constructor(client, data, handler) {
     super(client);
+    this.handler = handler;
     this._patch(data);
   }
 
@@ -97,16 +98,18 @@ class Interaction extends Base {
       }
     }
 
-    const { data, files } = await apiMessage.resolveFiles();
+    const resolved = await apiMessage.resolveFiles();
 
-    const clientId = this.client.interactionClient.clientId
-      || (await this.client.api.oauth2.applications('@me').get()).id;
+    if (!this.handler(resolved)) {
+      const clientID = this.client.interactionClient.clientID
+        || (await this.client.api.oauth2.applications('@me').get()).id;
 
-    return this.client.api.webhooks(clientId, this.token).post({
-      auth: false,
-      data,
-      files,
-    });
+      await this.client.api.webhooks(clientID, this.token).post({
+        auth: false,
+        data: resolved.data,
+        files: resolved.files,
+      });
+    }
   }
 }
 

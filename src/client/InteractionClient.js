@@ -1,7 +1,6 @@
 'use strict';
 
 const BaseClient = require('./BaseClient');
-const APIMessage = require('../structures/APIMessage');
 const Interaction = require('../structures/Interaction');
 const { ApplicationCommandOptionType, InteractionType, InteractionResponseType } = require('../util/Constants');
 
@@ -15,16 +14,16 @@ let sodium;
  *   token: ABC,
  *   publicKey: XYZ,
  * }, async (interaction) => {
+ *   // automatically handles long responses
  *   if (will take a long time) {
- *     doSomethingLong.then((d) => {
+ *     await doSomethingLong.then((d) => {
  *       interaction.reply({
  *         content: 'wow that took long',
  *       });
  *     });
- *     // return null to signal that we will be replying via `interaction.reply`.
- *     return null;
+ *   } else {
+ *     await interaction.reply('hi!');
  *   }
- *   return { content: 'hi!' };
  * });
  * ```
  */
@@ -40,7 +39,7 @@ class InteractionClient extends BaseClient {
     this.handler = handler;
     this.token = options.token;
     this.publicKey = options.publicKey ? Buffer.from(options.publicKey, 'hex') : undefined;
-    this.clientId = options.clientId;
+    this.clientID = options.clientID;
 
     // Compat for direct usage
     this.client = client || this;
@@ -94,44 +93,34 @@ class InteractionClient extends BaseClient {
           type: InteractionResponseType.PONG,
         };
       case InteractionType.APPLICATION_COMMAND: {
-        const interaction = new Interaction(this.client, data);
-
-        let done = false;
-        const r0 = new Promise(resolve => {
+        let timedOut = false;
+        let resolve;
+        const p0 = new Promise(r => {
+          resolve = r;
           this.client.setTimeout(() => {
-            done = true;
-            resolve({
+            timedOut = true;
+            r({
               type: InteractionResponseType.ACKNOWLEDGE_WITH_SOURCE,
             });
           }, 500);
         });
-        const r1 = this.handler(interaction).then(async r => {
-          if (done) {
-            interaction.reply(r).catch(e => {
-              this.client.emit('error', e);
-            });
-            return undefined;
+
+        const interaction = new Interaction(this.client, data, resolved => {
+          if (timedOut) {
+            return false;
           }
-
-          let apiMessage;
-
-          if (r instanceof APIMessage) {
-            apiMessage = r.resolveData();
-          } else {
-            apiMessage = APIMessage.create(interaction, r).resolveData();
-            if (Array.isArray(apiMessage.data.content)) {
-              throw new Error();
-            }
-          }
-
-          const resolved = await apiMessage.resolveFiles();
-          return {
+          resolve({
             type: InteractionResponseType.CHANNEL_MESSAGE_WITH_SOURCE,
             data: resolved.data,
-          };
+          });
+          return true;
         });
 
-        const result = await Promise.race([r0, r1]);
+        Promise.resolve(this.handler(interaction)).catch(e => {
+          this.client.emit('error', e);
+        });
+
+        const result = await p0;
 
         return result;
       }
@@ -175,8 +164,11 @@ class InteractionClient extends BaseClient {
   }
 
   async handleFromGateway(data) {
-    const interaction = new Interaction(this.client, data);
-    await this.handler(interaction);
+    const result = await this.handle(data);
+
+    await this.client.api.interactions(data.id, data.token).callback.post({
+      data: result,
+    });
   }
 }
 

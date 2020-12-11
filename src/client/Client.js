@@ -116,8 +116,7 @@ class Client extends BaseClient {
          * @event Client#interactionCreate
          * @param {Interaction} interaction The interaction which was created.
          */
-        this.client.emit(Events.INTERACTION_CREATE, interaction);
-        return null;
+        this.emit(Events.INTERACTION_CREATE, interaction);
       },
       this,
     );
