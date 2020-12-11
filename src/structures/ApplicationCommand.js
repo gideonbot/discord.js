@@ -23,14 +23,39 @@ class ApplicationCommand extends Base {
   }
 
   _patch(data) {
+    /**
+     * The ID of this command.
+     * @type {Snowflake}
+     * @readonly
+     */
     this.id = data.id;
 
+    /**
+     * The ID of the application which owns this command.
+     * @type {Snowflake}
+     * @readonly
+     */
     this.appplicationID = data.application_id;
 
+    /**
+     * The name of this command.
+     * @type {string}
+     * @readonly
+     */
     this.name = data.name;
 
+    /**
+     * The description of this command.
+     * @type {string}
+     * @readonly
+     */
     this.description = data.description;
 
+    /**
+     * The options of this command.
+     * @type {Object[]}
+     * @readonly
+     */
     this.options = data.options.map(function m(o) {
       return {
         type: ApplicationCommandOptionType[o.type],

@@ -1,8 +1,8 @@
 'use strict';
 
 const BaseClient = require('./BaseClient');
+const ApplicationCommand = require('../structures/ApplicationCommand');
 const Interaction = require('../structures/Interaction');
-const ApplicationCommand = require('../structures/InteractionCommand');
 const { ApplicationCommandOptionType, InteractionType, InteractionResponseType } = require('../util/Constants');
 
 let sodium;
@@ -50,7 +50,7 @@ class InteractionClient extends BaseClient {
   /**
    * Get registered slash commands.
    * @param {Snowflake?} guildID Optional guild ID.
-   * @returns {[Command]}
+   * @returns {Command[]}
    */
   async getCommands(guildID) {
     let path = this.client.api.applications('@me');
