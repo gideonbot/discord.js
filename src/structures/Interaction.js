@@ -2,7 +2,6 @@
 
 const APIMessage = require('./APIMessage');
 const Base = require('./Base');
-const { InteractionResponseType } = require('../util/Constants');
 const Snowflake = require('../util/Snowflake');
 
 /**
@@ -99,8 +98,8 @@ class Interaction extends Base {
     const resolved = await apiMessage.resolveFiles();
 
     if (!this.handler(resolved)) {
-      const clientID = this.client.interactionClient.clientID
-        || (await this.client.api.oauth2.applications('@me').get()).id;
+      const clientID =
+        this.client.interactionClient.clientID || (await this.client.api.oauth2.applications('@me').get()).id;
 
       await this.client.api.webhooks(clientID, this.token).post({
         auth: false,
