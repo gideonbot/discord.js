@@ -10,7 +10,7 @@ class ClientPresence extends Presence {
    * @param {Object} [data={}] The data for the client presence
    */
   constructor(client, data = {}) {
-    super(client, Object.assign(data, { status: 'online', user: { id: null } }));
+    super(client, Object.assign(data, { status: data.status || 'online', user: { id: null } }));
   }
 
   set(presence) {
