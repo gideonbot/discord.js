@@ -2242,8 +2242,8 @@ declare module 'discord.js' {
   type BufferResolvable = Buffer | string;
 
   interface ChannelCreationOverwrites {
-    allow?: PermissionResolvable | number;
-    deny?: PermissionResolvable | number;
+    allow?: PermissionResolvable;
+    deny?: PermissionResolvable;
     id: RoleResolvable | UserResolvable;
   }
 
