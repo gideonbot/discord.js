@@ -30,9 +30,9 @@ const Structures = require('../util/Structures');
  */
 class Client extends BaseClient {
   /**
-   * @param {ClientOptions} [options] Options for the client
+   * @param {ClientOptions} options Options for the client
    */
-  constructor(options = {}) {
+  constructor(options) {
     super(Object.assign({ _tokenType: 'Bot' }, options));
 
     // Obtain shard details from environment or if present, worker threads
@@ -447,9 +447,13 @@ class Client extends BaseClient {
    * @private
    */
   _validateOptions(options = this.options) {
-    if (typeof options.ws.intents !== 'undefined') {
-      options.ws.intents = Intents.resolve(options.ws.intents);
+    const intents = options.intents && Intents.resolve(options.intents);
+    if (!intents) {
+      throw new TypeError('CLIENT_MISSING_INTENTS');
     }
+
+    options.intents = intents;
+
     if (typeof options.shardCount !== 'number' || isNaN(options.shardCount) || options.shardCount < 1) {
       throw new TypeError('CLIENT_INVALID_OPTION', 'shardCount', 'a number greater than or equal to 1');
     }

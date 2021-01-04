@@ -9,12 +9,20 @@ class BitField {
   /**
    * @param {BitFieldResolvable} [bits=0] Bit(s) to read from
    */
-  constructor(bits) {
+  constructor(bits = 0) {
     /**
      * Bitfield of the packed bits
-     * @type {number}
+     * @type {number|bigint}
      */
     this.bitfield = this.constructor.resolve(bits);
+  }
+
+  /**
+   * @type {number|bigint}
+   * @private
+   */
+  get defaultBit() {
+    return typeof this.bitfield === 'bigint' ? 0n : 0;
   }
 
   /**
@@ -23,7 +31,7 @@ class BitField {
    * @returns {boolean}
    */
   any(bit) {
-    return (this.bitfield & this.constructor.resolve(bit)) !== 0;
+    return (this.bitfield & this.constructor.resolve(bit)) !== this.defaultBit;
   }
 
   /**
@@ -71,7 +79,7 @@ class BitField {
    * @returns {BitField} These bits or new BitField if the instance is frozen.
    */
   add(...bits) {
-    let total = 0;
+    let total = this.defaultBit;
     for (const bit of bits) {
       total |= this.constructor.resolve(bit);
     }
@@ -86,7 +94,7 @@ class BitField {
    * @returns {BitField} These bits or new BitField if the instance is frozen.
    */
   remove(...bits) {
-    let total = 0;
+    let total = this.defaultBit;
     for (const bit of bits) {
       total |= this.constructor.resolve(bit);
     }
@@ -117,7 +125,7 @@ class BitField {
   }
 
   toJSON() {
-    return this.bitfield;
+    return typeof this.bitfield === 'number' ? this.bitfield : this.bitfield.toString();
   }
 
   valueOf() {
@@ -134,18 +142,20 @@ class BitField {
    * * A bit number
    * * An instance of BitField
    * * An Array of BitFieldResolvable
-   * @typedef {string|number|BitField|BitFieldResolvable[]} BitFieldResolvable
+   * @typedef {string|number|bigint|BitField|BitFieldResolvable[]} BitFieldResolvable
    */
 
   /**
    * Resolves bitfields to their numeric form.
-   * @param {BitFieldResolvable} [bit=0] - bit(s) to resolve
-   * @returns {number}
+   * @param {BitFieldResolvable} [bit] - bit(s) to resolve
+   * @returns {number|bigint}
    */
-  static resolve(bit = 0) {
-    if (typeof bit === 'number' && bit >= 0) return bit;
+  static resolve(bit) {
+    const defaultBit = this.name === 'Permissions' ? 0n : 0;
+    if (typeof bit === 'undefined') return defaultBit;
+    if (['number', 'bigint'].includes(typeof bit) && bit >= defaultBit) return bit;
     if (bit instanceof BitField) return bit.bitfield;
-    if (Array.isArray(bit)) return bit.map(p => this.resolve(p)).reduce((prev, p) => prev | p, 0);
+    if (Array.isArray(bit)) return bit.map(p => this.resolve(p)).reduce((prev, p) => prev | p, defaultBit);
     if (typeof bit === 'string' && typeof this.FLAGS[bit] !== 'undefined') return this.FLAGS[bit];
     const error = new RangeError('BITFIELD_INVALID');
     error.bit = bit;

@@ -12,7 +12,7 @@ module.exports = async (client, { d: data }, shard) => {
       if (client.ws.status === Status.READY && client.options.fetchAllMembers) {
         await guild.members
           .fetch()
-          .catch(err => client.emit(Events.DEBUG, `Failed to fetch all members: ${err}\n${err.stack}`));
+          .catch(err => client.emit(Events.DEBUG, `Failed to fetch all members: ${err.stack}`));
       }
     }
   } else {

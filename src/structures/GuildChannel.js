@@ -6,6 +6,7 @@ const PermissionOverwrites = require('./PermissionOverwrites');
 const Role = require('./Role');
 const { Error, TypeError } = require('../errors');
 const Collection = require('../util/Collection');
+const { OverwriteTypes } = require('../util/Constants');
 const Permissions = require('../util/Permissions');
 const Util = require('../util/Util');
 
@@ -160,12 +161,12 @@ class GuildChannel extends Channel {
     const overwrites = this.overwritesFor(member, true, roles);
 
     return permissions
-      .remove(overwrites.everyone ? overwrites.everyone.deny : 0)
-      .add(overwrites.everyone ? overwrites.everyone.allow : 0)
-      .remove(overwrites.roles.length > 0 ? overwrites.roles.map(role => role.deny) : 0)
-      .add(overwrites.roles.length > 0 ? overwrites.roles.map(role => role.allow) : 0)
-      .remove(overwrites.member ? overwrites.member.deny : 0)
-      .add(overwrites.member ? overwrites.member.allow : 0)
+      .remove(overwrites.everyone ? overwrites.everyone.deny : 0n)
+      .add(overwrites.everyone ? overwrites.everyone.allow : 0n)
+      .remove(overwrites.roles.length > 0n ? overwrites.roles.map(role => role.deny) : 0n)
+      .add(overwrites.roles.length > 0n ? overwrites.roles.map(role => role.allow) : 0n)
+      .remove(overwrites.member ? overwrites.member.deny : 0n)
+      .add(overwrites.member ? overwrites.member.allow : 0n)
       .freeze();
   }
 
@@ -182,10 +183,10 @@ class GuildChannel extends Channel {
     const roleOverwrites = this.permissionOverwrites.get(role.id);
 
     return role.permissions
-      .remove(everyoneOverwrites ? everyoneOverwrites.deny : 0)
-      .add(everyoneOverwrites ? everyoneOverwrites.allow : 0)
-      .remove(roleOverwrites ? roleOverwrites.deny : 0)
-      .add(roleOverwrites ? roleOverwrites.allow : 0)
+      .remove(everyoneOverwrites ? everyoneOverwrites.deny : 0n)
+      .add(everyoneOverwrites ? everyoneOverwrites.allow : 0n)
+      .remove(roleOverwrites ? roleOverwrites.deny : 0n)
+      .add(roleOverwrites ? roleOverwrites.allow : 0n)
       .freeze();
   }
 
@@ -203,13 +204,12 @@ class GuildChannel extends Channel {
    *   },
    * ], 'Needed to change permissions');
    */
-  overwritePermissions(overwrites, reason) {
+  async overwritePermissions(overwrites, reason) {
     if (!Array.isArray(overwrites) && !(overwrites instanceof Collection)) {
-      return Promise.reject(
-        new TypeError('INVALID_TYPE', 'overwrites', 'Array or Collection of Permission Overwrites', true),
-      );
+      throw new TypeError('INVALID_TYPE', 'overwrites', 'Array or Collection of Permission Overwrites', true);
     }
-    return this.edit({ permissionOverwrites: overwrites, reason }).then(() => this);
+    await this.edit({ permissionOverwrites: overwrites, reason });
+    return this;
   }
 
   /**
@@ -226,13 +226,17 @@ class GuildChannel extends Channel {
    *   .then(channel => console.log(channel.permissionOverwrites.get(message.author.id)))
    *   .catch(console.error);
    */
-  updateOverwrite(userOrRole, options, reason) {
+  async updateOverwrite(userOrRole, options, reason) {
     userOrRole = this.guild.roles.resolve(userOrRole) || this.client.users.resolve(userOrRole);
     if (!userOrRole) return Promise.reject(new TypeError('INVALID_TYPE', 'parameter', 'User nor a Role'));
 
     const existing = this.permissionOverwrites.get(userOrRole.id);
-    if (existing) return existing.update(options, reason).then(() => this);
-    return this.createOverwrite(userOrRole, options, reason);
+    if (existing) {
+      await existing.update(options, reason);
+    } else {
+      await this.createOverwrite(userOrRole, options, reason);
+    }
+    return this;
   }
 
   /**
@@ -253,13 +257,19 @@ class GuildChannel extends Channel {
     userOrRole = this.guild.roles.resolve(userOrRole) || this.client.users.resolve(userOrRole);
     if (!userOrRole) return Promise.reject(new TypeError('INVALID_TYPE', 'parameter', 'User nor a Role'));
 
-    const type = userOrRole instanceof Role ? 'role' : 'member';
+    const type = userOrRole instanceof Role ? OverwriteTypes.role : OverwriteTypes.member;
     const { allow, deny } = PermissionOverwrites.resolveOverwriteOptions(options);
 
     return this.client.api
       .channels(this.id)
-      .permissions[userOrRole.id].put({
-        data: { id: userOrRole.id, type, allow: allow.bitfield, deny: deny.bitfield },
+      .permissions(userOrRole.id)
+      .put({
+        data: {
+          id: userOrRole.id,
+          type,
+          allow,
+          deny,
+        },
         reason,
       })
       .then(() => this);
@@ -283,7 +293,7 @@ class GuildChannel extends Channel {
   get members() {
     const members = new Collection();
     for (const member of this.guild.members.cache.values()) {
-      if (this.permissionsFor(member).has('VIEW_CHANNEL', false)) {
+      if (this.permissionsFor(member).has(Permissions.FLAGS.VIEW_CHANNEL, false)) {
         members.set(member.id, member);
       }
     }
