@@ -89,7 +89,7 @@ class ApplicationCommand extends Base {
 
   /**
    * Edit this command.
-   * @param {Object} data The data to update the command with
+   * @param {ApplicationCommandOptions} data The data to update the command with
    */
   async edit(data) {
     const raw = {};
