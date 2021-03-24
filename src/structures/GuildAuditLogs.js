@@ -4,6 +4,7 @@ const Integration = require('./Integration');
 const Webhook = require('./Webhook');
 const Collection = require('../util/Collection');
 const { OverwriteTypes, PartialTypes } = require('../util/Constants');
+const Permissions = require('../util/Permissions');
 const Snowflake = require('../util/Snowflake');
 const Util = require('../util/Util');
 
@@ -388,14 +389,14 @@ class GuildAuditLogsEntry {
             this.extra = guild.roles.cache.get(data.options.id) || {
               id: data.options.id,
               name: data.options.role_name,
-              type: OverwriteTypes[0],
+              type: OverwriteTypes[OverwriteTypes.role],
             };
             break;
 
           case OverwriteTypes.member:
             this.extra = guild.members.cache.get(data.options.id) || {
               id: data.options.id,
-              type: OverwriteTypes[1],
+              type: OverwriteTypes[OverwriteTypes.member],
             };
             break;
 
@@ -444,7 +445,7 @@ class GuildAuditLogsEntry {
         );
     } else if (targetType === Targets.INVITE) {
       this.target = guild.members.fetch(guild.client.user.id).then(me => {
-        if (me.permissions.has('MANAGE_GUILD')) {
+        if (me.permissions.has(Permissions.FLAGS.MANAGE_GUILD)) {
           const change = this.changes.find(c => c.key === 'code');
           return guild.fetchInvites().then(invites => {
             this.target = invites.find(i => i.code === (change.new || change.old));

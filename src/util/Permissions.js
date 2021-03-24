@@ -10,7 +10,9 @@ const BitField = require('./BitField');
  */
 class Permissions extends BitField {
   /**
-   * @param {PermissionResolvable} [bits=0] Bit(s) to read from
+   * Bitfield of the packed bits
+   * @type {bigint}
+   * @name Permissions#bitfield
    */
   constructor(bits = 0n) {
     super(bits);
@@ -85,6 +87,7 @@ class Permissions extends BitField {
  * * `MANAGE_ROLES`
  * * `MANAGE_WEBHOOKS`
  * * `MANAGE_EMOJIS`
+ * * `USE_APPLICATION_COMMANDS`
  * @type {Object<string, bigint>}
  * @see {@link https://discord.com/developers/docs/topics/permissions}
  */
@@ -120,6 +123,7 @@ Permissions.FLAGS = {
   MANAGE_ROLES: 1n << 28n,
   MANAGE_WEBHOOKS: 1n << 29n,
   MANAGE_EMOJIS: 1n << 30n,
+  USE_APPLICATION_COMMANDS: 1n << 31n,
 };
 
 /**
@@ -133,5 +137,7 @@ Permissions.ALL = Object.values(Permissions.FLAGS).reduce((all, p) => all | p, 0
  * @type {bigint}
  */
 Permissions.DEFAULT = BigInt(104324673);
+
+Permissions.defaultBit = BigInt(0);
 
 module.exports = Permissions;

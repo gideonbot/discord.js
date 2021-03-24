@@ -6,7 +6,6 @@ const auth = require('./auth.js');
 const Discord = require('../src');
 
 const client = new Discord.Client({
-  fetchAllMembers: false,
   partials: [],
   intents: Discord.Intents.NON_PRIVILEGED,
 });

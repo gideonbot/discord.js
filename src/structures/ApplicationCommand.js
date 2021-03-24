@@ -14,10 +14,17 @@ class ApplicationCommand extends Base {
 
     /**
      * The ID of the guild this command is part of, if any.
+<<<<<<< HEAD
      * @type {Snowflake?}
      * @readonly
      */
     this.guildID = guildID || null;
+=======
+     * @type {?Snowflake}
+     * @readonly
+     */
+    this.guildID = guildID ?? null;
+>>>>>>> 8dbd695f19e98734532e774171be9e813c236a94
 
     this._patch(data);
   }
@@ -88,10 +95,40 @@ class ApplicationCommand extends Base {
   }
 
   /**
+   * Edit this command.
+   * @param {ApplicationCommandOptions} data The data to update the command with
+   */
+  async edit(data) {
+    const raw = {};
+    if (data.name) {
+      raw.name = data.name;
+    }
+    if (data.description) {
+      raw.description = data.description;
+    }
+    if (data.options) {
+      raw.options = data.options.map(function m(o) {
+        return {
+          ...o,
+          type: ApplicationCommandOptionType[o.type],
+          options: o.options?.map(m),
+        };
+      });
+    }
+    let path = this.client.api.applications(this.client.applicationID);
+    if (this.guildID) {
+      path = path.guilds(this.guildID);
+    }
+    const r = await path.commands(this.id).patch({ data: raw });
+    this._patch(r);
+    return this;
+  }
+
+  /**
    * Delete this command.
    */
   async delete() {
-    let path = this.client.api.applications('@me');
+    let path = this.client.api.applications(this.client.applicationID);
     if (this.guildID) {
       path = path.guilds(this.guildID);
     }

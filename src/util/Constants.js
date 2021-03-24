@@ -18,8 +18,6 @@ const { Error, RangeError } = require('../errors');
  * sweepable (in seconds, 0 for forever)
  * @property {number} [messageSweepInterval=0] How frequently to remove messages from the cache that are older than
  * the message cache lifetime (in seconds, 0 for never)
- * @property {boolean} [fetchAllMembers=false] Whether to cache all guild members and users upon startup, as well as
- * upon joining a guild (should be avoided whenever possible)
  * @property {MessageMentionOptions} [allowedMentions] Default value for {@link MessageOptions#allowedMentions}
  * @property {PartialType[]} [partials] Structures allowed to be partial. This means events can be emitted even when
  * they're missing all the data for a particular structure. See the "Partials" topic listed in the sidebar for some
@@ -42,7 +40,6 @@ exports.DefaultOptions = {
   messageCacheMaxSize: 200,
   messageCacheLifetime: 0,
   messageSweepInterval: 0,
-  fetchAllMembers: false,
   partials: [],
   restWsBridgeTimeout: 5000,
   restRequestTimeout: 15000,
@@ -382,6 +379,36 @@ exports.WSEvents = keyMirror([
 ]);
 
 /**
+ * A valid scope to request when generating an invite link.
+ * <warn>Scopes that require whitelist are not considered valid for this generator</warn>
+ * * `applications.builds.read`: allows reading build data for a users applications
+ * * `applications.commands`: allows this bot to create commands in the server
+ * * `applications.entitlements`: allows reading entitlements for a users applications
+ * * `applications.store.update`: allows reading and updating of store data for a users applications
+ * * `connections`: makes the endpoint for getting a users connections available
+ * * `email`: allows the `/users/@me` endpoint return with an email
+ * * `identify`: allows the `/users/@me` endpoint without an email
+ * * `guilds`: makes the `/users/@me/guilds` endpoint available for a user
+ * * `guilds.join`: allows the bot to join the user to any guild it is in using Guild#addMember
+ * * `gdm.join`: allows joining the user to a group dm
+ * * `webhook.incoming`: generates a webhook to a channel
+ * @typedef {string} InviteScope
+ */
+exports.InviteScopes = [
+  'applications.builds.read',
+  'applications.commands',
+  'applications.entitlements',
+  'applications.store.update',
+  'connections',
+  'email',
+  'identity',
+  'guilds',
+  'guilds.join',
+  'gdm.join',
+  'webhook.incoming',
+];
+
+/**
  * The type of a message, e.g. `DEFAULT`. Here are the available types:
  * * DEFAULT
  * * RECIPIENT_ADD
@@ -685,35 +712,6 @@ exports.WebhookTypes = [
   'Channel Follower',
 ];
 
-exports.ApplicationCommandOptionType = {
-  SUB_COMMAND: 1,
-  SUB_COMMAND_GROUP: 2,
-  STRING: 3,
-  INTEGER: 4,
-  BOOLEAN: 5,
-  USER: 6,
-  CHANNEL: 7,
-  ROLE: 8,
-};
-Object.entries(exports.ApplicationCommandOptionType).forEach(([k, v]) => {
-  exports.ApplicationCommandOptionType[v] = k;
-});
-
-exports.InteractionType = {
-  PING: 1,
-  APPLICATION_COMMAND: 2,
-};
-Object.entries(exports.InteractionType).forEach(([k, v]) => {
-  exports.InteractionType[v] = k;
-});
-
-exports.InteractionResponseType = {
-  PONG: 1,
-  ACKNOWLEDGE: 2,
-  CHANNEL_MESSAGE: 3,
-  CHANNEL_MESSAGE_WITH_SOURCE: 4,
-  ACKNOWLEDGE_WITH_SOURCE: 5,
-};
 /**
  * An overwrite type:
  * * role
@@ -721,6 +719,29 @@ exports.InteractionResponseType = {
  * @typedef {string} OverwriteType
  */
 exports.OverwriteTypes = createEnum(['role', 'member']);
+
+exports.ApplicationCommandOptionType = createEnum([
+  null,
+  'SUB_COMMAND',
+  'SUB_COMMAND_GROUP',
+  'STRING',
+  'INTEGER',
+  'BOOLEAN',
+  'USER',
+  'CHANNEL',
+  'ROLE',
+]);
+
+exports.InteractionType = createEnum([null, 'PING', 'APPLICATION_COMMAND']);
+
+exports.InteractionResponseType = createEnum([
+  null,
+  'PONG',
+  null,
+  null,
+  'CHANNEL_MESSAGE_WITH_SOURCE',
+  'DEFERRED_CHANNEL_MESSAGE_WITH_SOURCE',
+]);
 
 function keyMirror(arr) {
   let tmp = Object.create(null);
