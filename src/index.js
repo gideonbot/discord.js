@@ -36,6 +36,7 @@ module.exports = {
   // Managers
   BaseGuildEmojiManager: require('./managers/BaseGuildEmojiManager'),
   ChannelManager: require('./managers/ChannelManager'),
+  GuildBanManager: require('./managers/GuildBanManager'),
   GuildChannelManager: require('./managers/GuildChannelManager'),
   GuildEmojiManager: require('./managers/GuildEmojiManager'),
   GuildEmojiRoleManager: require('./managers/GuildEmojiRoleManager'),
@@ -77,6 +78,7 @@ module.exports = {
   Emoji: require('./structures/Emoji'),
   Guild: require('./structures/Guild'),
   GuildAuditLogs: require('./structures/GuildAuditLogs'),
+  GuildBan: require('./structures/GuildBan'),
   GuildChannel: require('./structures/GuildChannel'),
   GuildEmoji: require('./structures/GuildEmoji'),
   GuildMember: require('./structures/GuildMember'),

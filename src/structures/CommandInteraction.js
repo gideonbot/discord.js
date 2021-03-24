@@ -104,11 +104,7 @@ class CommandInteraction extends Interaction {
      * @type {Object}
      * @readonly
      */
-<<<<<<< HEAD
     this.options = data.data.options;
-=======
-    this.options = data.data.options.map(map);
->>>>>>> 8dbd695f19e98734532e774171be9e813c236a94
   }
 
   /**
@@ -130,7 +126,6 @@ class CommandInteraction extends Interaction {
   }
 
   /**
-<<<<<<< HEAD
    * Acknowledge this interaction without content.
    * @param {Object} [options] Options
    */
@@ -139,8 +134,6 @@ class CommandInteraction extends Interaction {
   }
 
   /**
-=======
->>>>>>> 8dbd695f19e98734532e774171be9e813c236a94
    * Reply to this interaction.
    * @param {(StringResolvable | APIMessage)?} content The content for the message.
    * @param {(MessageOptions | MessageAdditions)?} options The options to provide.
@@ -152,18 +145,14 @@ class CommandInteraction extends Interaction {
       apiMessage = content.resolveData();
     } else {
       apiMessage = APIMessage.create(this, content, options).resolveData();
-<<<<<<< HEAD
       if (Array.isArray(apiMessage.data.content)) {
         throw new Error('Message is too long');
       }
-=======
->>>>>>> 8dbd695f19e98734532e774171be9e813c236a94
     }
 
     const resolved = await apiMessage.resolveFiles();
 
     if (!this.syncHandle.reply(resolved)) {
-<<<<<<< HEAD
       const clientID =
         this.client.interactionClient.clientID || (await this.client.api.oauth2.applications('@me').get()).id;
 
@@ -171,13 +160,6 @@ class CommandInteraction extends Interaction {
         auth: false,
         data: resolved.data,
         files: resolved.files,
-=======
-      await this.client.api.webhooks(this.applicationID, this.token).post({
-        auth: false,
-        data: resolved.data,
-        files: resolved.files,
-        query: { wait: true },
->>>>>>> 8dbd695f19e98734532e774171be9e813c236a94
       });
     }
   }

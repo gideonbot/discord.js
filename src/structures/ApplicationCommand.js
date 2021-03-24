@@ -14,17 +14,10 @@ class ApplicationCommand extends Base {
 
     /**
      * The ID of the guild this command is part of, if any.
-<<<<<<< HEAD
      * @type {Snowflake?}
      * @readonly
      */
     this.guildID = guildID || null;
-=======
-     * @type {?Snowflake}
-     * @readonly
-     */
-    this.guildID = guildID ?? null;
->>>>>>> 8dbd695f19e98734532e774171be9e813c236a94
 
     this._patch(data);
   }
